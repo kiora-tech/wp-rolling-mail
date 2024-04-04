@@ -1,0 +1,64 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Formidable Sequential Submissions\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-04-03 11:43+0000\n"
+"PO-Revision-Date: 2024-04-03 14:33+0000\n"
+"Last-Translator: \n"
+"Language-Team: English (United States)\n"
+"Language: en_US\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Loco https://localise.biz/\n"
+"X-Loco-Version: 2.6.7; wp-6.5\n"
+"X-Domain: fss"
+
+#. Add another cc email
+msgid "add another cc email"
+msgstr "Add another CC email"
+
+#. Add another email
+msgid "add another email"
+msgstr "Add another email"
+
+#. Add more cc email help
+msgid "add more cc email help"
+msgstr "Enter CC email addresses. Click 'Add another CC email' to add more."
+
+#. Add more email help
+msgid "add more email help"
+msgstr "Enter email addresses. Click 'Add another email' to add more."
+
+#. Email label
+msgid "email"
+msgstr "Email address"
+
+#. Email addresses
+msgid "email addresses"
+msgstr "Email addresses"
+
+#. Email cc label
+msgid "email cc"
+msgstr "CC email"
+
+#. Email cc addresses
+msgid "email cc addresses"
+msgstr "CC email addresses"
+
+#. Email subject
+msgid "email subject"
+msgstr "Email subject"
+
+#. General settings
+msgid "general settings"
+msgstr "General settings"
+
+#. Invalid email
+msgid "invalid email"
+msgstr "Invalid email address"
+
+#. Success message
+msgid "success message"
+msgstr "The changes have been saved successfully."

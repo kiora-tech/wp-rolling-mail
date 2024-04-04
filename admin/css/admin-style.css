@@ -1,0 +1,90 @@
+#fss-email-fields, #fss-cc-email-fields, #fss-email-subject{
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+}
+
+.fss-email-field, .fss-cc-email-field, .fss-email-subject-field{
+    display: flex;
+    align-items: center;
+    margin: 10px 0;
+    padding: 10px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.fss-email-field label, .fss-cc-email-field label{
+    flex-grow: 1;
+    margin-right: 10px;
+    font-weight: bold;
+    color: #333;
+}
+
+.fss-email-field input[type="email"], .fss-cc-email-field input[type="email"], .fss-email-subject-field input[type="text"]{
+    flex-grow: 3;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    line-height: 20px;
+}
+
+#fss-add-email, #fss-add-cc-email {
+    display: inline-block;
+    background-color: #0085ba;
+    color: #ffffff;
+    border: none;
+    padding: 10px 20px;
+    margin-top: 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 20px;
+    transition: background-color 0.3s ease;
+}
+
+#fss-add-email:hover, #fss-add-email:focus, #fss-add-cc-email:hover, #fss-add-cc-email:focus{
+    background-color: #0073aa;
+    color: #ffffff;
+    outline: none;
+}
+
+.fss-email-field:hover {
+    cursor: move;
+}
+
+.fss-add-container {
+    margin-top: 20px;
+    text-align: right;
+}
+
+.description {
+    margin-top: 10px;
+    font-size: 13px;
+    color: #666;
+}
+
+.fss-delete-email {
+    margin-left: 10px;
+    color: red;
+    cursor: pointer;
+    font-size: 25px;
+    font-weight: bold;
+}
+
+.fss-email-error {
+    color: red;
+    margin-top: 4px;
+    font-size: 12px;
+}
+
+.frm-admin-footer-links{
+    display: none;
+}
+
+.s11-floating-links-logo-icon{
+    display: none;
+}
