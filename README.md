@@ -32,9 +32,4 @@ collectées via les formulaires.
 ## Développement
 
 Ce plugin a été conçu et développé par Kiora avec passion et ❤️. Pour toute contribution, question ou
-suggestion, n'hésitez pas à contacter le développeur ou à visiter le [répertoire GitHub](https://github.com) du projet.
-
-## Licence
-
-Ce plugin est licencié sous la Licence Publique Générale GNU version 2 ou ultérieure. Voir le fichier LICENSE inclus
-avec le code pour plus de détails.
+suggestion, n'hésitez pas à contacter le développeur.
