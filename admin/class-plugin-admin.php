@@ -93,9 +93,11 @@ class Formidable_Sequential_Submissions_Admin {
     }
 
     public function sanitize_emails($input) {
+        $input = is_array($input) ? $input : [];
         $emails = array_filter($input, function($email) {
             return !empty($email);
         });
+
         return array_map('sanitize_email', $emails);
     }
 
