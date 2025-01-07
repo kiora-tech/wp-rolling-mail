@@ -1,35 +1,32 @@
-# Formidable Sequential Submissions
+### Formidable Sequential Submissions
 
-Ce plugin pour WordPress permet l'envoi séquentiel des soumissions d'un formulaire Formidable Forms à une liste
-d'utilisateurs configurable, améliorant ainsi la gestion des flux de travail et la distribution des informations
-collectées via les formulaires.
+This WordPress plugin enables the sequential submission of Formidable Forms entries to a configurable list of users, improving workflow management and the distribution of information collected through forms.
 
-## Caractéristiques
+---
 
-- **Envoi Séquentiel** : Les soumissions de formulaire sont envoyées séquentiellement à une liste configurable
-  d'adresses email.
-- **Gestion des destinataires** : Configurez facilement les adresses email des destinataires et des copies (CC)
-  directement depuis l'interface d'administration de WordPress.
+### Features
 
-## Installation
+- **Sequential Submission**: Form entries are sent sequentially to a configurable list of email addresses.
+- **Recipient Management**: Easily configure recipient and CC email addresses directly from the WordPress admin interface.
 
-1. Téléchargez le plugin depuis la source de votre choix et extrayez-le dans le dossier `/wp-content/plugins/` de votre
-   installation WordPress.
-2. Accédez à l'administration de WordPress, allez dans le menu `Plugins` et activez le plugin "Formidable Sequential
-   Submissions".
-3. Une fois activé, un nouveau menu "Formidable Sequential Submissions" apparaîtra dans l'administration. Cliquez dessus
-   pour configurer les adresses email des destinataires et des copies (CC).
+---
 
-## Configuration
+### Installation
 
-1. **Ajout des destinataires** : Dans la page de configuration du plugin, ajoutez les adresses email des destinataires
-   principaux.
-2. **Configuration des CC** : Si nécessaire, ajoutez également les adresses en CC pour qu'elles reçoivent une copie des
-   soumissions.
-3. **Sauvegarde** : Après avoir configuré les adresses, cliquez sur "Enregistrer les modifications". Un message de
-   confirmation apparaîtra pour indiquer le succès de l'opération.
+1. Download the plugin from your preferred source and extract it into the `/wp-content/plugins/` directory of your WordPress installation.
+2. Access the WordPress admin panel, navigate to the Plugins menu, and activate the plugin **"Formidable Sequential Submissions"**.
+3. Once activated, a new menu **"Formidable Sequential Submissions"** will appear in the admin panel. Click on it to configure the recipient and CC email addresses.
 
-## Développement
+---
 
-Ce plugin a été conçu et développé par Kiora avec passion et ❤️. Pour toute contribution, question ou
-suggestion, n'hésitez pas à contacter le développeur.
+### Configuration
+
+1. **Add Recipients**: On the plugin's configuration page, add the primary recipient email addresses.
+2. **Set CC Addresses**: If needed, add CC email addresses to receive a copy of the submissions.
+3. **Save Changes**: After configuring the email addresses, click **"Save Changes"**. A confirmation message will appear to indicate the operation was successful.
+
+---
+
+### Development
+
+This plugin was designed and developed by Kiora with passion and ❤️. For any contributions, questions, or suggestions, feel free to contact the developer.
