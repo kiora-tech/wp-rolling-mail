@@ -171,11 +171,22 @@ class Formidable_Sequential_Submissions_Admin {
 
         echo '<div style="' . ($thematic_mode === 'disabled' ? 'opacity: 0.5;' : '') . '">';
 
+        // Message explicatif détaillé
+        echo '<div class="notice notice-info inline" style="margin: 10px 0 15px 0; padding: 10px;">';
+        echo '<p style="margin: 0 0 8px 0;"><strong>ℹ️ Qu\'est-ce qu\'un champ thématique ?</strong></p>';
+        echo '<p style="margin: 0 0 8px 0;">Un champ thématique permet de router automatiquement les emails vers différentes listes selon la valeur sélectionnée par l\'utilisateur dans le formulaire.</p>';
+        echo '<p style="margin: 0 0 8px 0;"><strong>Exemple :</strong> Si vous avez un champ "Type de demande" avec les valeurs "Santé", "Prévoyance" et "Retraite", chaque type sera envoyé à une liste d\'emails spécifique.</p>';
+        echo '<p style="margin: 0;"><strong>📋 Note :</strong> Seuls les champs de type radio button ou liste déroulante (select) sont compatibles avec le routage thématique.</p>';
+        echo '</div>';
+
         if (empty($fields)) {
-            echo '<p class="description" style="color: #d63638;">' . __('No compatible fields found. Only radio and select fields (single choice) can be used for thematic routing.', 'fss') . '</p>';
+            echo '<div class="notice notice-warning inline" style="margin: 10px 0; padding: 10px;">';
+            echo '<p style="margin: 0;"><strong>⚠️ Aucun champ compatible trouvé</strong></p>';
+            echo '<p style="margin: 5px 0 0 0;">Seuls les champs de type radio button ou liste déroulante peuvent être utilisés pour le routage thématique. Assurez-vous d\'avoir créé au moins un champ de ce type dans vos formulaires Formidable.</p>';
+            echo '</div>';
         } else {
             echo '<select id="fss_thematic_field_id" name="fss_thematic_field_id" ' . $disabled . '>';
-            echo '<option value="">' . __('-- Select a field --', 'fss') . '</option>';
+            echo '<option value="">' . __('-- Sélectionnez un champ --', 'fss') . '</option>';
 
             foreach ($fields as $field) {
                 $selected = ($selected_field_id == $field->id) ? 'selected' : '';
@@ -209,7 +220,7 @@ class Formidable_Sequential_Submissions_Admin {
                         console.log('[FSS] Description element found:', $description.length > 0);
 
                         if ($description.length) {
-                            $description.html('<span style="color: #2271b1;"><strong>⏳ Loading field values... The page will reload automatically.</strong></span>');
+                            $description.html('<span style="color: #2271b1;"><strong>⏳ Chargement des valeurs du champ... La page va se recharger automatiquement.</strong></span>');
                         }
 
                         // Auto-submit le formulaire en cliquant sur le bouton submit
@@ -232,17 +243,24 @@ class Formidable_Sequential_Submissions_Admin {
             </script>
             <?php
 
-            echo '<p class="description">';
-            _e('Select which field to use for thematic routing. The page will automatically reload to show available values.', 'fss');
+            echo '<p class="description" style="margin-top: 10px;">';
+            echo '<strong>💡 Conseil :</strong> Après avoir sélectionné un champ, la page se rechargera pour afficher toutes les valeurs possibles dans la section "Configuration des emails par thématique" ci-dessous.';
             echo '</p>';
+
+            // Message si aucun champ sélectionné
+            if (!$selected_field_id) {
+                echo '<p class="description" style="color: #d63638; margin-top: 8px;">';
+                echo '⚠️ <strong>Laissez ce champ vide pour désactiver complètement le routage thématique</strong> et utiliser uniquement la liste principale de rotation.';
+                echo '</p>';
+            }
 
             // Afficher un avertissement si le champ a changé
             if ($selected_field_id && isset($_GET['settings-updated'])) {
                 // Invalider le cache après la sauvegarde
                 delete_transient('fss_field_values_' . $selected_field_id);
-                echo '<p class="description" style="color: #d63638; font-weight: bold;">';
-                _e('Field selection updated. The page will reload the available values for the new field.', 'fss');
-                echo '</p>';
+                echo '<div class="notice notice-success inline" style="margin: 10px 0;">';
+                echo '<p style="margin: 0;">✅ <strong>Champ mis à jour avec succès.</strong> Les valeurs disponibles ont été rechargées pour le nouveau champ sélectionné.</p>';
+                echo '</div>';
             }
         }
 
@@ -266,8 +284,18 @@ class Formidable_Sequential_Submissions_Admin {
 
         echo '<div style="' . ($thematic_mode === 'disabled' ? 'opacity: 0.5;' : '') . '">';
 
+        // Message explicatif détaillé en haut
+        echo '<div class="notice notice-info inline" style="margin: 10px 0 15px 0; padding: 10px;">';
+        echo '<p style="margin: 0 0 8px 0;"><strong>📧 Configuration des emails par thématique</strong></p>';
+        echo '<p style="margin: 0 0 8px 0;">Cette section vous permet d\'assigner des listes d\'emails spécifiques à chaque valeur du champ thématique. Les valeurs similaires sont automatiquement regroupées ensemble.</p>';
+        echo '<p style="margin: 0 0 8px 0;"><strong>Exemple :</strong> Si vous sélectionnez "Prévoyance", tous les formulaires où l\'utilisateur a choisi "Prévoyance" seront envoyés aux emails configurés dans cette section.</p>';
+        echo '<p style="margin: 0;"><strong>💡 Important :</strong> Si aucun email n\'est configuré pour une valeur, le système utilisera automatiquement la liste principale de rotation comme solution de secours (fallback).</p>';
+        echo '</div>';
+
         if (!$selected_field_id) {
-            echo '<p class="description">' . __('Please select a thematic field above first.', 'fss') . '</p>';
+            echo '<div class="notice notice-warning inline" style="margin: 10px 0; padding: 10px;">';
+            echo '<p style="margin: 0;">⚠️ <strong>Veuillez d\'abord sélectionner un champ thématique dans la section ci-dessus.</strong></p>';
+            echo '</div>';
             echo '</div>';
             return;
         }
@@ -276,9 +304,10 @@ class Formidable_Sequential_Submissions_Admin {
         $field_values = $this->get_field_values_with_counts($selected_field_id);
 
         if (empty($field_values)) {
-            echo '<p class="description" style="color: #d63638;">';
-            _e('No values found for the selected field. Make sure there are form submissions with this field filled.', 'fss');
-            echo '</p>';
+            echo '<div class="notice notice-warning inline" style="margin: 10px 0; padding: 10px;">';
+            echo '<p style="margin: 0;"><strong>⚠️ Aucune valeur trouvée pour ce champ</strong></p>';
+            echo '<p style="margin: 5px 0 0 0;">Assurez-vous qu\'il existe au moins une soumission de formulaire avec ce champ rempli. Les valeurs possibles apparaîtront ici dès qu\'elles seront utilisées dans les formulaires.</p>';
+            echo '</div>';
             echo '</div>';
             return;
         }
@@ -311,9 +340,11 @@ class Formidable_Sequential_Submissions_Admin {
             }
         }
 
-        echo '<p class="description" style="font-weight: bold; margin-bottom: 15px;">';
-        printf(__('Found %d unique normalized value(s) in the selected field:', 'fss'), count($grouped_values));
-        echo '</p>';
+        echo '<div class="notice notice-success inline" style="margin: 10px 0 15px 0; padding: 10px;">';
+        echo '<p style="margin: 0;">✅ <strong>';
+        printf(__('%d valeur(s) unique(s) détectée(s) dans le champ sélectionné', 'fss'), count($grouped_values));
+        echo '</strong></p>';
+        echo '</div>';
 
         // Afficher un champ pour chaque valeur groupée
         foreach ($grouped_values as $normalized_key => $group_data) {
@@ -363,9 +394,18 @@ class Formidable_Sequential_Submissions_Admin {
             _e('add another email', 'fss');
             echo '</button>';
 
+            // Message d'avertissement si aucun email configuré mais des entrées existent
             if (empty($existing_emails) && $group_data['total_entries'] > 0) {
-                echo '<p class="description" style="color: #d63638; margin-top: 10px;">';
-                _e('Warning: No email addresses configured for this value, but entries exist. These submissions will use the main rotation list as fallback.', 'fss');
+                echo '<div class="notice notice-warning inline" style="margin-top: 10px; padding: 8px;">';
+                echo '<p style="margin: 0;">⚠️ <strong>Aucun email configuré pour cette valeur</strong></p>';
+                echo '<p style="margin: 5px 0 0 0;">Il existe ' . $group_data['total_entries'] . ' soumission(s) avec cette valeur, mais aucun email n\'est configuré. Ces formulaires seront automatiquement envoyés à la liste principale de rotation (fallback).</p>';
+                echo '</div>';
+            }
+
+            // Message informatif si des emails sont configurés
+            if (!empty($existing_emails)) {
+                echo '<p class="description" style="margin-top: 10px; color: #2271b1;">';
+                echo '✅ <strong>' . count($existing_emails) . ' email(s) configuré(s)</strong> - Les formulaires avec cette valeur seront envoyés en rotation à ces adresses.';
                 echo '</p>';
             }
 
@@ -511,13 +551,34 @@ class Formidable_Sequential_Submissions_Admin {
 
     public function email_subject_callback() {
         $subject = get_option('fss_email_subject', '');
+
         echo '<div id="fss-email-subject">';
-        echo '<div class="fss-email-subject-field"><input type="text" id="fss_email_subject" name="fss_email_subject" value="' . esc_attr($subject) . '"/></div>';
+        echo '<div class="fss-email-subject-field"><input type="text" id="fss_email_subject" name="fss_email_subject" value="' . esc_attr($subject) . '" style="width: 100%; max-width: 500px;"/></div>';
+
+        echo '<div class="notice notice-info inline" style="margin: 10px 0; padding: 10px;">';
+        echo '<p style="margin: 0 0 8px 0;"><strong>ℹ️ Sujet de TOUS les emails envoyés</strong></p>';
+        echo '<p style="margin: 0 0 8px 0;">Ce sujet sera appliqué à tous les emails de rotation, qu\'ils soient envoyés via la liste principale ou via les listes thématiques.</p>';
+        echo '<p style="margin: 0;"><strong>Exemple :</strong> "Nouveau formulaire de contact reçu" ou "Demande d\'information - Site web"</p>';
+        echo '</div>';
+
+        if (empty($subject)) {
+            echo '<p class="description" style="color: #d63638; margin-top: 8px;">';
+            echo '⚠️ <strong>Sujet vide :</strong> Un sujet par défaut sera utilisé si vous laissez ce champ vide.';
+            echo '</p>';
+        }
+
         echo '</div>';
     }
 
     public function email_cc_callback() {
         $cc_emails = get_option('fss_email_cc', array());
+
+        echo '<div class="notice notice-info inline" style="margin: 0 0 15px 0; padding: 10px;">';
+        echo '<p style="margin: 0 0 8px 0;"><strong>📧 Les emails en copie (CC) reçoivent TOUS les formulaires</strong></p>';
+        echo '<p style="margin: 0 0 8px 0;">Les adresses en copie carbone recevront systématiquement une copie de chaque formulaire soumis, qu\'il soit routé via la liste principale ou via une liste thématique.</p>';
+        echo '<p style="margin: 0;"><strong>Exemple d\'usage :</strong> Idéal pour l\'archivage centralisé, la supervision managériale, ou pour garder une trace de tous les formulaires reçus.</p>';
+        echo '</div>';
+
         echo '<div id="fss-email-cc-fields">';
         if (!empty($cc_emails)) {
             foreach ($cc_emails as $email) {
@@ -525,13 +586,30 @@ class Formidable_Sequential_Submissions_Admin {
             }
         }
         echo '</div>';
+
         echo '<button type="button" id="fss-add-cc-email">'.__('add another cc email', 'fss').'</button>';
-        echo '<p class="description">'.__('add more cc email help', 'fss').'</p>';
+
+        if (empty($cc_emails)) {
+            echo '<p class="description" style="margin-top: 10px; color: #666;">';
+            echo 'ℹ️ Aucun email en copie configuré. Laissez cette section vide si vous n\'avez pas besoin de copies systématiques.';
+            echo '</p>';
+        } else {
+            echo '<p class="description" style="margin-top: 10px; color: #2271b1;">';
+            echo '✅ <strong>' . count($cc_emails) . ' email(s) en copie configuré(s)</strong> - Ces adresses recevront une copie de chaque formulaire.';
+            echo '</p>';
+        }
     }
 
     public function emails_field_callback() {
         $emails = get_option('fss_emails');
-        echo '<h4>Main Rotation List (Fallback)</h4>';
+
+        echo '<div class="notice notice-info inline" style="margin: 0 0 15px 0; padding: 10px;">';
+        echo '<p style="margin: 0 0 8px 0;"><strong>📧 Liste principale de rotation (Fallback)</strong></p>';
+        echo '<p style="margin: 0 0 8px 0;">Cette liste contient les adresses emails qui recevront les formulaires en rotation séquentielle. Chaque nouveau formulaire est envoyé à l\'adresse suivante dans la liste.</p>';
+        echo '<p style="margin: 0 0 8px 0;"><strong>Fonctionnement de la rotation :</strong> Email 1 → Email 2 → Email 3 → Email 1 → Email 2 → etc.</p>';
+        echo '<p style="margin: 0;"><strong>💡 Utilisation comme fallback :</strong> Si le routage thématique est activé mais qu\'aucun email n\'est configuré pour une valeur spécifique, cette liste sera utilisée automatiquement. Elle reçoit aussi tous les formulaires sans champ thématique rempli.</p>';
+        echo '</div>';
+
         echo '<div id="fss-email-fields">';
         $index = 0;
         if (!empty($emails)) {
@@ -540,8 +618,19 @@ class Formidable_Sequential_Submissions_Admin {
             }
         }
         echo '</div>';
+
         echo '<button type="button" id="fss-add-email">'.__('add another email', 'fss').'</button>';
-        echo '<p class="description">'.__('Main email rotation list. Used when thematic filtering is disabled, or as fallback when no thematic-specific list is configured.', 'fss').'</p>';
+
+        if (empty($emails)) {
+            echo '<div class="notice notice-warning inline" style="margin: 10px 0; padding: 8px;">';
+            echo '<p style="margin: 0;">⚠️ <strong>Aucun email configuré dans la liste principale</strong></p>';
+            echo '<p style="margin: 5px 0 0 0;">Attention : Si le routage thématique n\'a pas d\'emails configurés pour certaines valeurs, ces formulaires ne pourront pas être envoyés (aucun fallback disponible).</p>';
+            echo '</div>';
+        } else {
+            echo '<p class="description" style="margin-top: 10px; color: #2271b1;">';
+            echo '✅ <strong>' . count($emails) . ' email(s) configuré(s)</strong> - Les formulaires seront distribués en rotation parmi ces ' . count($emails) . ' adresse(s).';
+            echo '</p>';
+        }
     }
 
     public function sanitize_emails($input) {
