@@ -1,0 +1,389 @@
+================================================================================
+                    PHASE 6 - COMMANDES UTILES
+                    Tests de Non-Régression
+================================================================================
+
+Cette aide-mémoire contient toutes les commandes utiles pour travailler
+avec la suite de tests Phase 6.
+
+================================================================================
+INSTALLATION
+================================================================================
+
+# Installer tous les fichiers de test dans le container
+/tmp/PHASE6-INSTALL.sh
+
+# Vérifier que les fichiers sont présents
+docker exec wp_axa ls -la /tmp/phase6-*
+docker exec wp_axa ls -la /tmp/PHASE6-*
+
+# Vérifier la syntaxe PHP
+docker exec wp_axa php -l /tmp/phase6-test-suite.php
+docker exec wp_axa php -l /tmp/phase6-test-helpers.php
+
+================================================================================
+EXÉCUTION DES TESTS
+================================================================================
+
+# Lister tous les tests disponibles
+docker exec wp_axa wp eval-file /tmp/phase6-test-suite.php list --allow-root
+
+# Exécuter TOUS les tests
+docker exec wp_axa wp eval-file /tmp/phase6-test-suite.php --allow-root
+
+# Exécuter UN SEUL test (exemple : test 1)
+docker exec wp_axa wp eval-file /tmp/phase6-test-suite.php 1 --allow-root
+
+# Exécuter un test individuel directement
+docker exec wp_axa wp eval-file /tmp/phase6-tests/test-01-rotation-simple.php --allow-root
+
+================================================================================
+CONSULTATION DES RAPPORTS
+================================================================================
+
+# Voir le rapport généré (Markdown)
+docker exec wp_axa cat /tmp/PHASE6-TEST-REPORT.md
+
+# Copier le rapport vers la machine hôte
+docker cp wp_axa:/tmp/PHASE6-TEST-REPORT.md ./PHASE6-TEST-REPORT.md
+
+# Sauvegarder le rapport avec timestamp
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+docker cp wp_axa:/tmp/PHASE6-TEST-REPORT.md ./reports/PHASE6-TEST-REPORT-${TIMESTAMP}.md
+
+================================================================================
+DOCUMENTATION
+================================================================================
+
+# Vue d'ensemble et quick start
+docker exec wp_axa cat /tmp/PHASE6-README.md
+
+# Guide complet d'utilisation
+docker exec wp_axa cat /tmp/PHASE6-TESTING-GUIDE.md
+
+# Template du rapport
+docker exec wp_axa cat /tmp/PHASE6-TEST-REPORT-TEMPLATE.md
+
+# Liste de tous les fichiers créés
+docker exec wp_axa cat /tmp/PHASE6-FILES-CREATED.txt
+
+# Résumé de livraison
+docker exec wp_axa cat /tmp/PHASE6-SUMMARY.md
+
+# Cette aide-mémoire
+docker exec wp_axa cat /tmp/PHASE6-COMMANDS.txt
+
+================================================================================
+VÉRIFICATION DE L'ENVIRONNEMENT
+================================================================================
+
+# Vérifier que le container est en cours d'exécution
+docker ps | grep wp_axa
+
+# Vérifier WordPress
+docker exec wp_axa wp core version --allow-root
+
+# Vérifier les plugins installés
+docker exec wp_axa wp plugin list --allow-root
+
+# Vérifier Formidable Forms
+docker exec wp_axa wp eval --allow-root 'echo class_exists("FrmEntry") ? "✓ Formidable OK" : "✗ Formidable manquant";'
+
+# Vérifier WP Rolling Mail plugin
+docker exec wp_axa wp eval --allow-root 'echo class_exists("FSS_Email_Handler") ? "✓ Plugin OK" : "✗ Plugin manquant";'
+
+# Vérifier MailHog
+curl http://localhost:8025/api/v2/messages
+
+# Vérifier que MailHog est accessible depuis le container
+docker exec wp_axa curl -s http://mailhog:8025/api/v2/messages | head -1
+
+================================================================================
+GESTION DES OPTIONS WORDPRESS
+================================================================================
+
+# Voir les options du plugin
+docker exec wp_axa wp eval --allow-root 'print_r(get_option("fss_emails"));'
+docker exec wp_axa wp eval --allow-root 'print_r(get_option("fss_thematic_emails"));'
+docker exec wp_axa wp eval --allow-root 'echo get_option("fss_thematic_field_id");'
+
+# Réinitialiser les options du plugin
+docker exec wp_axa wp eval --allow-root '
+delete_option("fss_emails");
+delete_option("fss_email_cc");
+delete_option("fss_current_index");
+delete_option("fss_thematic_field_id");
+delete_option("fss_thematic_emails");
+delete_option("fss_thematic_filter_mode");
+delete_option("fss_form_filter_mode");
+delete_option("fss_form_ids");
+echo "Options nettoyées\n";
+'
+
+================================================================================
+GESTION DE MAILHOG
+================================================================================
+
+# Voir tous les emails dans MailHog (depuis l'hôte)
+curl http://localhost:8025/api/v2/messages
+
+# Vider MailHog (supprimer tous les emails)
+curl -X DELETE http://localhost:8025/api/v1/messages
+
+# Compter le nombre d'emails dans MailHog
+curl -s http://localhost:8025/api/v2/messages | jq '.total'
+
+# Interface web MailHog
+# Ouvrir dans le navigateur : http://localhost:8025
+
+================================================================================
+LOGS ET DÉBOGAGE
+================================================================================
+
+# Voir les logs WordPress en temps réel
+docker exec wp_axa tail -f /var/www/html/wp-content/debug.log
+
+# Voir les 50 dernières lignes des logs
+docker exec wp_axa tail -50 /var/www/html/wp-content/debug.log
+
+# Chercher les logs FSS (plugin)
+docker exec wp_axa grep "\[FSS\]" /var/www/html/wp-content/debug.log
+
+# Vider le fichier de logs
+docker exec wp_axa bash -c "echo '' > /var/www/html/wp-content/debug.log"
+
+# Activer WP_DEBUG si nécessaire
+docker exec wp_axa wp eval --allow-root 'echo WP_DEBUG ? "✓ Debug activé" : "✗ Debug désactivé";'
+
+================================================================================
+GESTION DES ENTRIES FORMIDABLE
+================================================================================
+
+# Lister les formulaires
+docker exec wp_axa wp eval --allow-root 'foreach(FrmForm::getAll() as $form) echo $form->id . ": " . $form->name . "\n";'
+
+# Compter les entries du formulaire 3
+docker exec wp_axa wp eval --allow-root 'echo "Total entries: " . FrmEntry::getRecordCount(["it.form_id" => 3]) . "\n";'
+
+# Voir les 5 dernières entries
+docker exec wp_axa wp eval --allow-root 'foreach(FrmEntry::getAll(["form_id" => 3], "created_at DESC", 5) as $e) echo $e->id . " - " . $e->created_at . "\n";'
+
+# Supprimer les entries de test (ATTENTION!)
+# docker exec wp_axa wp eval --allow-root 'foreach(FrmEntry::getAll(["form_id" => 3]) as $e) { if(strpos($e->description, "Test") !== false) FrmEntry::destroy($e->id); }'
+
+================================================================================
+SAUVEGARDE ET RESTAURATION
+================================================================================
+
+# Sauvegarder tous les fichiers de test hors du container
+mkdir -p ./backup/phase6-tests
+docker cp wp_axa:/tmp/phase6-test-suite.php ./backup/
+docker cp wp_axa:/tmp/phase6-test-helpers.php ./backup/
+docker cp wp_axa:/tmp/phase6-tests ./backup/
+docker cp wp_axa:/tmp/PHASE6-RUNNER.sh ./backup/
+docker cp wp_axa:/tmp/PHASE6-README.md ./backup/
+docker cp wp_axa:/tmp/PHASE6-TESTING-GUIDE.md ./backup/
+
+# Restaurer les fichiers dans le container
+docker cp ./backup/phase6-test-suite.php wp_axa:/tmp/
+docker cp ./backup/phase6-test-helpers.php wp_axa:/tmp/
+docker cp ./backup/phase6-tests wp_axa:/tmp/
+docker cp ./backup/PHASE6-RUNNER.sh wp_axa:/tmp/
+
+================================================================================
+TESTS RAPIDES
+================================================================================
+
+# Test rapide : Vérifier que tout fonctionne
+docker exec wp_axa wp eval-file /tmp/phase6-test-suite.php list --allow-root | head -20
+
+# Test rapide : Exécuter uniquement le test 2 (le plus rapide)
+docker exec wp_axa wp eval-file /tmp/phase6-test-suite.php 2 --allow-root
+
+# Test rapide : Vérifier MailHog et nettoyer
+curl -s http://localhost:8025/api/v2/messages | head -1
+curl -X DELETE http://localhost:8025/api/v1/messages
+
+================================================================================
+NETTOYAGE
+================================================================================
+
+# Nettoyer les options WordPress
+docker exec wp_axa wp eval --allow-root '
+delete_option("fss_emails");
+delete_option("fss_email_cc");
+delete_option("fss_current_index");
+delete_option("fss_thematic_field_id");
+delete_option("fss_thematic_emails");
+delete_option("fss_thematic_filter_mode");
+echo "Options nettoyées\n";
+'
+
+# Vider MailHog
+curl -X DELETE http://localhost:8025/api/v1/messages
+
+# Supprimer le rapport de test
+docker exec wp_axa rm -f /tmp/PHASE6-TEST-REPORT.md
+
+# Nettoyer les logs
+docker exec wp_axa bash -c "echo '' > /var/www/html/wp-content/debug.log"
+
+# Tout nettoyer d'un coup
+curl -X DELETE http://localhost:8025/api/v1/messages && \
+docker exec wp_axa wp eval --allow-root 'delete_option("fss_emails"); delete_option("fss_email_cc"); delete_option("fss_thematic_emails");' && \
+docker exec wp_axa rm -f /tmp/PHASE6-TEST-REPORT.md && \
+echo "✓ Nettoyage complet effectué"
+
+================================================================================
+STATISTIQUES
+================================================================================
+
+# Compter les lignes de code PHP de test
+docker exec wp_axa bash -c "find /tmp -name 'phase6-*.php' -o -name 'test-*.php' | xargs wc -l | tail -1"
+
+# Compter le nombre total de fichiers
+docker exec wp_axa bash -c "ls /tmp/phase6-* /tmp/PHASE6-* | wc -l"
+
+# Taille totale des fichiers
+docker exec wp_axa bash -c "du -sh /tmp/phase6-tests"
+
+# Lister tous les fichiers avec leur taille
+docker exec wp_axa ls -lh /tmp/phase6-* /tmp/PHASE6-*
+
+================================================================================
+DÉBOGAGE AVANCÉ
+================================================================================
+
+# Exécuter du code PHP personnalisé
+docker exec wp_axa wp eval --allow-root 'echo "Hello from WordPress\n";'
+
+# Tester la connexion MailHog depuis le container
+docker exec wp_axa curl -v http://mailhog:8025/api/v2/messages
+
+# Vérifier les classes chargées
+docker exec wp_axa wp eval --allow-root 'print_r(get_declared_classes());' | grep -i frm
+
+# Tester l'envoi d'un email simple
+docker exec wp_axa wp eval --allow-root 'wp_mail("test@example.com", "Test", "Message de test"); echo "Email envoyé\n";'
+
+# Vérifier la configuration SMTP
+docker exec wp_axa wp eval --allow-root 'echo "SMTP Host: " . ini_get("SMTP") . "\n";'
+
+================================================================================
+RACCOURCIS UTILES
+================================================================================
+
+# Alias pour faciliter l'utilisation (à ajouter dans ~/.bashrc)
+alias p6-list='docker exec wp_axa wp eval-file /tmp/phase6-test-suite.php list --allow-root'
+alias p6-run='docker exec wp_axa wp eval-file /tmp/phase6-test-suite.php --allow-root'
+alias p6-test='docker exec wp_axa wp eval-file /tmp/phase6-test-suite.php'
+alias p6-report='docker exec wp_axa cat /tmp/PHASE6-TEST-REPORT.md'
+alias p6-clean='curl -X DELETE http://localhost:8025/api/v1/messages'
+alias p6-logs='docker exec wp_axa tail -f /var/www/html/wp-content/debug.log'
+
+# Après avoir ajouté ces alias, les utiliser :
+# p6-list           # Lister les tests
+# p6-run            # Exécuter tous les tests
+# p6-test 1         # Exécuter le test 1
+# p6-report         # Voir le rapport
+# p6-clean          # Nettoyer MailHog
+# p6-logs           # Voir les logs en temps réel
+
+================================================================================
+TROUBLESHOOTING
+================================================================================
+
+# Si "container not found"
+docker ps -a | grep wp_axa
+docker start wp_axa
+
+# Si "command not found: wp"
+docker exec wp_axa which wp
+docker exec wp_axa wp --version --allow-root
+
+# Si "Class 'FrmEntry' not found"
+docker exec wp_axa wp plugin activate formidable --allow-root
+docker exec wp_axa wp plugin activate formidable-pro --allow-root
+
+# Si "FSS_Email_Handler not found"
+docker exec wp_axa wp plugin activate wp-rolling-mail --allow-root
+
+# Si "MailHog connection refused"
+curl http://localhost:8025/api/v2/messages
+docker ps | grep mailhog
+
+# Si les tests échouent de manière aléatoire
+# Augmenter les délais dans phase6-test-helpers.php
+# Ligne : Phase6_Test_Helpers::sleep_ms(500); → 1000
+
+# Si "syntax error" dans les fichiers PHP
+docker exec wp_axa php -l /tmp/phase6-test-suite.php
+docker exec wp_axa php -l /tmp/phase6-test-helpers.php
+
+================================================================================
+PERFORMANCE
+================================================================================
+
+# Mesurer le temps d'exécution d'un test
+time docker exec wp_axa wp eval-file /tmp/phase6-test-suite.php 1 --allow-root
+
+# Mesurer le temps d'exécution de tous les tests
+time docker exec wp_axa wp eval-file /tmp/phase6-test-suite.php --allow-root
+
+# Profiler un test spécifique
+docker exec wp_axa wp eval --allow-root '
+$start = microtime(true);
+require_once "/tmp/phase6-test-helpers.php";
+require_once "/tmp/phase6-tests/test-01-rotation-simple.php";
+phase6_test_01_rotation_simple();
+$duration = microtime(true) - $start;
+echo "Durée: " . round($duration, 2) . "s\n";
+'
+
+================================================================================
+INTÉGRATION CI/CD
+================================================================================
+
+# Exemple de script pour GitLab CI / GitHub Actions
+# .gitlab-ci.yml ou .github/workflows/test.yml
+
+# test-phase6:
+#   script:
+#     - docker start wp_axa
+#     - docker exec wp_axa wp eval-file /tmp/phase6-test-suite.php --allow-root
+#     - docker cp wp_axa:/tmp/PHASE6-TEST-REPORT.md ./
+#   artifacts:
+#     paths:
+#       - PHASE6-TEST-REPORT.md
+#     expire_in: 30 days
+
+# Exécution locale simulation CI/CD
+docker start wp_axa && \
+docker exec wp_axa wp eval-file /tmp/phase6-test-suite.php --allow-root && \
+docker cp wp_axa:/tmp/PHASE6-TEST-REPORT.md ./ && \
+echo "✓ Tests terminés, rapport copié"
+
+================================================================================
+AIDE ET SUPPORT
+================================================================================
+
+# Documentation complète
+docker exec wp_axa cat /tmp/PHASE6-TESTING-GUIDE.md | less
+
+# FAQ rapide
+docker exec wp_axa cat /tmp/PHASE6-README.md | less
+
+# Voir cette aide-mémoire
+docker exec wp_axa cat /tmp/PHASE6-COMMANDS.txt | less
+
+# Résumé de livraison
+docker exec wp_axa cat /tmp/PHASE6-SUMMARY.md
+
+================================================================================
+FIN DU FICHIER
+================================================================================
+
+Pour plus d'informations :
+- Guide complet : /tmp/PHASE6-TESTING-GUIDE.md
+- README : /tmp/PHASE6-README.md
+- Résumé : /tmp/PHASE6-SUMMARY.md

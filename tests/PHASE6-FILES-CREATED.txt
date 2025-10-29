@@ -1,0 +1,252 @@
+================================================================================
+                  PHASE 6 - FICHIERS CRÉÉS
+                  Tests de Non-Régression
+================================================================================
+
+Date de création : 2025-10-29
+Projet : WP Rolling Mail (Formidable Sequential Submissions)
+
+================================================================================
+FICHIERS PRINCIPAUX
+================================================================================
+
+1. /tmp/phase6-test-suite.php
+   - Script principal orchestrant tous les tests
+   - Taille : ~250 lignes
+   - Usage : docker exec wp_axa wp eval-file /tmp/phase6-test-suite.php --allow-root
+
+2. /tmp/phase6-test-helpers.php
+   - Fonctions utilitaires pour les tests
+   - Taille : ~450 lignes
+   - Contient : assertions, MailHog API, création d'entries, reporting
+
+3. /tmp/PHASE6-RUNNER.sh
+   - Script bash pour exécution facile des tests
+   - Taille : ~300 lignes
+   - Usage : /tmp/PHASE6-RUNNER.sh [--test NUM|--list|--report|--clean|--help]
+   - Status : Exécutable (chmod +x déjà appliqué)
+
+================================================================================
+FICHIERS DE TESTS INDIVIDUELS (10 tests)
+================================================================================
+
+4. /tmp/phase6-tests/test-01-rotation-simple.php
+   - Test : Rotation simple sans configuration thématique
+   - Vérifie : Distribution 2-2-2 sur 6 soumissions
+
+5. /tmp/phase6-tests/test-02-no-emails.php
+   - Test : Gestion gracieuse de l'absence d'emails
+   - Vérifie : Erreur critique loggée, pas d'email envoyé
+
+6. /tmp/phase6-tests/test-03-cc-independent.php
+   - Test : CC reçoivent tous les emails
+   - Vérifie : CC indépendants de la rotation
+
+7. /tmp/phase6-tests/test-04-performance.php
+   - Test : Performance avec 10 soumissions rapides
+   - Vérifie : Temps < 5 secondes, distribution correcte
+
+8. /tmp/phase6-tests/test-05-rotation-coherence.php
+   - Test : Cohérence de la rotation sous charge (50 entrées)
+   - Vérifie : Distribution parfaite 10-10-10-10-10
+
+9. /tmp/phase6-tests/test-06-thematic-routing.php
+   - Test : Routage thématique basique
+   - Vérifie : Emails routés vers la bonne liste thématique
+
+10. /tmp/phase6-tests/test-07-fallback.php
+    - Test : Fallback vers liste principale
+    - Vérifie : Utilisation du fallback si thématique non configurée
+
+11. /tmp/phase6-tests/test-08-normalization.php
+    - Test : Normalisation des clés thématiques
+    - Vérifie : "Prévoyance" et "Type : Prévoyance" → même liste
+
+12. /tmp/phase6-tests/test-09-invalid-emails.php
+    - Test : Filtrage des emails invalides
+    - Vérifie : Emails invalides ignorés, warnings loggés
+
+13. /tmp/phase6-tests/test-10-invalid-field.php
+    - Test : Gestion des field ID inexistants
+    - Vérifie : Fallback si field ID invalide
+
+================================================================================
+FICHIERS DE DOCUMENTATION
+================================================================================
+
+14. /tmp/PHASE6-TESTING-GUIDE.md
+    - Guide complet d'utilisation des tests
+    - Contient : Architecture, utilisation, dépannage, best practices
+    - Taille : ~500 lignes de documentation
+
+15. /tmp/PHASE6-TEST-REPORT-TEMPLATE.md
+    - Template du rapport généré automatiquement
+    - Contient : Structure, exemples, interprétation
+    - Taille : ~300 lignes de documentation
+
+16. /tmp/PHASE6-README.md
+    - Vue d'ensemble du projet de tests
+    - Contient : Quick start, couverture, commandes, métriques
+    - Taille : ~350 lignes de documentation
+
+17. /tmp/PHASE6-FILES-CREATED.txt
+    - Ce fichier (liste de tous les fichiers créés)
+
+================================================================================
+FICHIERS GÉNÉRÉS LORS DE L'EXÉCUTION
+================================================================================
+
+Ces fichiers seront créés automatiquement lors de l'exécution des tests :
+
+18. /tmp/PHASE6-TEST-REPORT.md
+    - Rapport détaillé généré après l'exécution
+    - Format : Markdown
+    - Contient : Résumé, résultats détaillés, recommandations
+    - Généré par : phase6-test-suite.php
+
+================================================================================
+STATISTIQUES
+================================================================================
+
+Total de fichiers créés : 17 fichiers (+ 1 généré)
+Total de lignes de code : ~2000 lignes
+Total de lignes de documentation : ~1200 lignes
+
+Répartition :
+- Code PHP de test : 10 fichiers (~1500 lignes)
+- Infrastructure : 3 fichiers (~1000 lignes)
+- Documentation : 4 fichiers (~1200 lignes)
+
+================================================================================
+STRUCTURE DES RÉPERTOIRES
+================================================================================
+
+/tmp/
+├── phase6-test-suite.php          # Script principal
+├── phase6-test-helpers.php        # Fonctions utilitaires
+├── PHASE6-RUNNER.sh               # Script bash (exécutable)
+├── phase6-tests/                  # Répertoire des tests
+│   ├── test-01-rotation-simple.php
+│   ├── test-02-no-emails.php
+│   ├── test-03-cc-independent.php
+│   ├── test-04-performance.php
+│   ├── test-05-rotation-coherence.php
+│   ├── test-06-thematic-routing.php
+│   ├── test-07-fallback.php
+│   ├── test-08-normalization.php
+│   ├── test-09-invalid-emails.php
+│   └── test-10-invalid-field.php
+├── PHASE6-TESTING-GUIDE.md        # Guide d'utilisation
+├── PHASE6-TEST-REPORT-TEMPLATE.md # Template de rapport
+├── PHASE6-README.md               # Vue d'ensemble
+├── PHASE6-FILES-CREATED.txt       # Ce fichier
+└── PHASE6-TEST-REPORT.md          # Rapport généré (après exécution)
+
+================================================================================
+QUICK START
+================================================================================
+
+1. Vérifier que tous les fichiers sont présents :
+   ls -la /tmp/phase6-* /tmp/PHASE6-*
+
+2. Vérifier que le répertoire des tests existe :
+   ls -la /tmp/phase6-tests/
+
+3. Rendre le script exécutable (si nécessaire) :
+   chmod +x /tmp/PHASE6-RUNNER.sh
+
+4. Exécuter tous les tests :
+   /tmp/PHASE6-RUNNER.sh
+
+5. Voir le rapport :
+   /tmp/PHASE6-RUNNER.sh --report
+
+================================================================================
+COMMANDES UTILES
+================================================================================
+
+# Lister tous les fichiers créés
+ls -lh /tmp/phase6-* /tmp/PHASE6-*
+
+# Compter les lignes de code
+find /tmp -name "phase6-*.php" -o -name "test-*.php" | xargs wc -l
+
+# Vérifier la syntaxe PHP de tous les fichiers
+find /tmp -name "*.php" -path "*/phase6-*" -exec php -l {} \;
+
+# Copier tous les fichiers dans le container (si nécessaire)
+docker cp /tmp/phase6-test-suite.php wp_axa:/tmp/
+docker cp /tmp/phase6-test-helpers.php wp_axa:/tmp/
+docker cp /tmp/phase6-tests wp_axa:/tmp/
+docker cp /tmp/PHASE6-RUNNER.sh wp_axa:/tmp/
+
+# Sauvegarder tous les fichiers hors du container
+docker cp wp_axa:/tmp/phase6-test-suite.php ./backup/
+docker cp wp_axa:/tmp/phase6-test-helpers.php ./backup/
+docker cp wp_axa:/tmp/phase6-tests ./backup/
+docker cp wp_axa:/tmp/PHASE6-*.* ./backup/
+
+================================================================================
+VÉRIFICATION DE L'INSTALLATION
+================================================================================
+
+Exécutez ces commandes pour vérifier que tout est en place :
+
+# 1. Vérifier les fichiers principaux
+test -f /tmp/phase6-test-suite.php && echo "✓ Suite de tests OK" || echo "✗ Suite de tests manquante"
+test -f /tmp/phase6-test-helpers.php && echo "✓ Helpers OK" || echo "✗ Helpers manquants"
+test -x /tmp/PHASE6-RUNNER.sh && echo "✓ Runner OK et exécutable" || echo "✗ Runner manquant ou non exécutable"
+
+# 2. Vérifier les tests individuels
+for i in {01..10}; do
+    test -f /tmp/phase6-tests/test-${i}-*.php && echo "✓ Test ${i} OK" || echo "✗ Test ${i} manquant"
+done
+
+# 3. Vérifier la documentation
+test -f /tmp/PHASE6-TESTING-GUIDE.md && echo "✓ Guide OK" || echo "✗ Guide manquant"
+test -f /tmp/PHASE6-README.md && echo "✓ README OK" || echo "✗ README manquant"
+
+# 4. Vérifier la syntaxe PHP (dans le container)
+docker exec wp_axa php -l /tmp/phase6-test-suite.php
+docker exec wp_axa php -l /tmp/phase6-test-helpers.php
+
+================================================================================
+CONTACT ET SUPPORT
+================================================================================
+
+Pour toute question ou problème :
+- Consulter le guide : /tmp/PHASE6-TESTING-GUIDE.md
+- Voir les exemples de rapport : /tmp/PHASE6-TEST-REPORT-TEMPLATE.md
+- Consulter le README : /tmp/PHASE6-README.md
+
+================================================================================
+NOTES IMPORTANTES
+================================================================================
+
+1. Tous les fichiers sont dans /tmp/ (ou /tmp/phase6-tests/)
+2. Le script PHASE6-RUNNER.sh est déjà exécutable
+3. Les tests créent et suppriment des entries Formidable automatiquement
+4. MailHog doit être accessible sur http://mailhog:8025
+5. Les tests sont conçus pour ne PAS modifier les données de production
+6. Chaque test nettoie après lui-même
+7. Le rapport est régénéré à chaque exécution complète
+8. Les tests peuvent être exécutés individuellement ou en suite complète
+
+================================================================================
+VALIDATION
+================================================================================
+
+✅ 17 fichiers créés
+✅ 10 tests couvrant toutes les fonctionnalités
+✅ Documentation complète fournie
+✅ Script bash pour exécution facile
+✅ Génération automatique de rapports
+✅ Fonctions helper réutilisables
+✅ Support MailHog intégré
+✅ Tests de performance inclus
+✅ Gestion des edge cases
+✅ Prêt à l'emploi
+
+================================================================================
+FIN DU FICHIER
+================================================================================
