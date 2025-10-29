@@ -31,6 +31,11 @@ jQuery(document).ready(function($) {
         $('#fss-email-cc-fields').append(newField);
     });
 
+    $('#fss-add-bcc-email').click(function() {
+        var newField = $('<div class="fss-bcc-email-field"><label>email bcc</label><input type="email" name="fss_email_bcc[]" value="" /><span class="fss-delete-email">🗑</span></div>');
+        $('#fss-email-bcc-fields').append(newField);
+    });
+
     $('body').on('click', '.fss-delete-email', function() {
         $(this).closest('.fss-email-field').remove();
     });

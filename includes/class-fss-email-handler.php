@@ -43,10 +43,12 @@ class FSS_Email_Handler {
         $thematic_key = $this->get_entry_thematic($entry);
         $email_list = $this->get_appropriate_email_list($entry);
         $cc_email_list = get_option('fss_email_cc', []);
+        $bcc_email_list = get_option('fss_email_bcc', []);
 
         // PHASE 5.3 - CAS 5: Filtrer et valider les emails
         $email_list = $this->validate_and_filter_emails($email_list, 'main/thematic rotation');
         $cc_email_list = $this->validate_and_filter_emails($cc_email_list, 'CC');
+        $bcc_email_list = $this->validate_and_filter_emails($bcc_email_list, 'BCC');
 
         // PHASE 5.3 - CAS 3: Aucune liste d'emails configurée (ni thématique ni principale)
         if (empty($email_list)) {
@@ -80,6 +82,18 @@ class FSS_Email_Handler {
             error_log("[FSS] No CC recipients configured");
         }
 
+        // BONUS: Gestion des BCC (copie cachée)
+        $bcc_count = count($bcc_email_list);
+        $headers = array();
+        if ($bcc_count > 0) {
+            error_log("[FSS] Adding {$bcc_count} BCC recipients: " . implode(', ', $bcc_email_list));
+            foreach ($bcc_email_list as $bcc_email) {
+                $headers[] = 'Bcc: ' . $bcc_email;
+            }
+        } else {
+            error_log("[FSS] No BCC recipients configured");
+        }
+
         // PHASE 5.2: Log de la construction du message
         $subject = get_option('fss_email_subject', 'Nouvelle soumission de formulaire');
         error_log("[FSS] Building email with subject: '{$subject}'");
@@ -98,10 +112,13 @@ class FSS_Email_Handler {
         error_log("[FSS] Message body length: {$message_length} characters");
 
         // PHASE 5.2: Log de l'envoi
-        error_log("[FSS] Sending email to: {$next_email}" . ($cc_count > 0 ? " (+ {$cc_count} CC)" : ""));
+        $recipient_info = "{$next_email}";
+        if ($cc_count > 0) $recipient_info .= " (+ {$cc_count} CC)";
+        if ($bcc_count > 0) $recipient_info .= " (+ {$bcc_count} BCC)";
+        error_log("[FSS] Sending email to: {$recipient_info}");
 
         // PHASE 5.3 - CAS 7: Gestion de l'échec de wp_mail()
-        $result = wp_mail($to, $subject, $message);
+        $result = wp_mail($to, $subject, $message, $headers);
 
         if ($result) {
             error_log("[FSS] ✓ Email sent successfully");

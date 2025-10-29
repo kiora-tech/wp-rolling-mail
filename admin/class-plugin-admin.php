@@ -81,6 +81,9 @@ class Formidable_Sequential_Submissions_Admin {
 
         register_setting('fss_options_group', 'fss_email_cc', array($this, 'sanitize_emails'));
         add_settings_field('fss_email_cc_field', __('email cc addresses', 'fss'), array($this, 'email_cc_callback'), 'formidable-sequential-submissions', 'fss_general');
+
+        register_setting('fss_options_group', 'fss_email_bcc', array($this, 'sanitize_emails'));
+        add_settings_field('fss_email_bcc_field', __('email bcc addresses', 'fss'), array($this, 'email_bcc_callback'), 'formidable-sequential-submissions', 'fss_general');
     }
 
     public function form_filter_mode_callback() {
@@ -596,6 +599,36 @@ class Formidable_Sequential_Submissions_Admin {
         } else {
             echo '<p class="description" style="margin-top: 10px; color: #2271b1;">';
             echo '✅ <strong>' . count($cc_emails) . ' email(s) en copie configuré(s)</strong> - Ces adresses recevront une copie de chaque formulaire.';
+            echo '</p>';
+        }
+    }
+
+    public function email_bcc_callback() {
+        $bcc_emails = get_option('fss_email_bcc', array());
+
+        echo '<div class="notice notice-info inline" style="margin: 0 0 15px 0; padding: 10px;">';
+        echo '<p style="margin: 0 0 8px 0;"><strong>🔒 Les emails en copie cachée (BCC) reçoivent TOUS les formulaires de manière invisible</strong></p>';
+        echo '<p style="margin: 0 0 8px 0;">Les adresses en copie carbone invisible recevront systématiquement une copie de chaque formulaire soumis, <strong>sans que les autres destinataires ne le sachent</strong>.</p>';
+        echo '<p style="margin: 0;"><strong>Exemple d\'usage :</strong> Idéal pour l\'archivage discret, l\'audit interne, la conformité RGPD, ou pour monitorer sans interférer avec les destinataires principaux.</p>';
+        echo '</div>';
+
+        echo '<div id="fss-email-bcc-fields">';
+        if (!empty($bcc_emails)) {
+            foreach ($bcc_emails as $email) {
+                echo '<div class="fss-bcc-email-field"><label>'.__('email bcc', 'fss').'</label><input type="email" name="fss_email_bcc[]" value="' . esc_attr($email) . '" /><span class="fss-delete-email">🗑</span></div>';
+            }
+        }
+        echo '</div>';
+
+        echo '<button type="button" id="fss-add-bcc-email">'.__('add another bcc email', 'fss').'</button>';
+
+        if (empty($bcc_emails)) {
+            echo '<p class="description" style="margin-top: 10px; color: #666;">';
+            echo 'ℹ️ Aucun email en copie cachée configuré. Laissez cette section vide si vous n\'avez pas besoin de copies invisibles.';
+            echo '</p>';
+        } else {
+            echo '<p class="description" style="margin-top: 10px; color: #2271b1;">';
+            echo '✅ <strong>' . count($bcc_emails) . ' email(s) en copie cachée configuré(s)</strong> - Ces adresses recevront une copie discrète de chaque formulaire.';
             echo '</p>';
         }
     }
