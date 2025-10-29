@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Formidable Sequential Submissions
  * Description: This plugin allows you to send sequential submissions to Formidable Forms.
- * Version: 1.0
+ * Version: 1.1.0
  * Author: Kiora
  * Text Domain: fss
  * Domain Path: /languages
