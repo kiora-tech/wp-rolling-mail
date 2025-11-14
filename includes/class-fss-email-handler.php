@@ -114,10 +114,105 @@ class FSS_Email_Handler {
             if (is_numeric($key)) {
                 $field = FrmField::getOne($key);
                 if ($field) {
-                    // Handle array values (checkboxes, multi-select fields)
-                    if (is_array($value)) {
-                        $value = implode(', ', $value);
+                    // CORRECTION: Si la valeur est un ID de champ (numérique), récupérer la vraie valeur
+                    // Cela arrive avec les champs répétables ou sous-champs dans Formidable Forms
+                    // SÉCURITÉ: Vérifications multiples pour éviter les faux positifs
+
+                    // 1. Exclure les champs qui devraient contenir des nombres
+                    $numeric_field_types = array('number', 'range', 'scale');
+                    $is_numeric_field = in_array($field->type, $numeric_field_types);
+
+                    // CAS 1: Valeur simple (non-array)
+                    if (is_numeric($value) && !is_array($value) && !$is_numeric_field) {
+                        $resolved = false;
+
+                        // Option A: Vérifier si c'est un entry_id (child entry)
+                        $potential_entry = FrmEntry::getOne($value, true);
+                        if ($potential_entry && isset($potential_entry->metas)) {
+                            $child_data = array();
+                            foreach ($potential_entry->metas as $child_field_id => $child_value) {
+                                if (is_numeric($child_field_id)) {
+                                    $child_field = FrmField::getOne($child_field_id);
+                                    if ($child_field && !empty($child_value)) {
+                                        $child_data[] = (isset($child_field->name) ? $child_field->name : "Field #{$child_field_id}") . ": " . (is_array($child_value) ? implode(', ', $child_value) : $child_value);
+                                    }
+                                }
+                            }
+                            if (!empty($child_data)) {
+                                error_log("[FSS] Field #{$key} ({$field->name}): Value {$value} was child entry ID, resolved to: " . implode(' | ', $child_data));
+                                $value = implode(' | ', $child_data);
+                                $resolved = true;
+                            }
+                        }
+
+                        // Option B: Vérifier si c'est un field_id
+                        if (!$resolved) {
+                            $potential_field = FrmField::getOne($value);
+                            if ($potential_field !== null) {
+                                $real_value = FrmEntryMeta::get_entry_meta_by_field($entry_id, $value);
+                                if (!empty($real_value)) {
+                                    error_log("[FSS] Field #{$key} ({$field->name}): Value was field ID {$value}, resolved to: " . print_r($real_value, true));
+                                    $value = $real_value;
+                                    $resolved = true;
+                                } else {
+                                    error_log("[FSS] Field #{$key} ({$field->name}): Value {$value} looks like field ID but no data found, keeping original value");
+                                }
+                            }
+                        }
                     }
+
+                    // CAS 2: Array de valeurs (peut contenir des field IDs OU des entry IDs)
+                    if (is_array($value)) {
+                        $resolved_values = array();
+                        foreach ($value as $single_value) {
+                            if (is_numeric($single_value) && !$is_numeric_field) {
+                                $resolved = false;
+
+                                // Option A: Vérifier si c'est un entry_id (child entry d'un champ répétable)
+                                $potential_entry = FrmEntry::getOne($single_value, true);
+                                if ($potential_entry && isset($potential_entry->metas)) {
+                                    // C'est une child entry, extraire toutes ses données
+                                    $child_data = array();
+                                    foreach ($potential_entry->metas as $child_field_id => $child_value) {
+                                        if (is_numeric($child_field_id)) {
+                                            $child_field = FrmField::getOne($child_field_id);
+                                            if ($child_field && !empty($child_value)) {
+                                                $child_data[] = (isset($child_field->name) ? $child_field->name : "Field #{$child_field_id}") . ": " . (is_array($child_value) ? implode(', ', $child_value) : $child_value);
+                                            }
+                                        }
+                                    }
+                                    if (!empty($child_data)) {
+                                        error_log("[FSS] Field #{$key} ({$field->name}): Array item {$single_value} was child entry ID, resolved to: " . implode(' | ', $child_data));
+                                        $resolved_values[] = implode(' | ', $child_data);
+                                        $resolved = true;
+                                    }
+                                }
+
+                                // Option B: Vérifier si c'est un field_id
+                                if (!$resolved) {
+                                    $potential_field = FrmField::getOne($single_value);
+                                    if ($potential_field !== null) {
+                                        $real_value = FrmEntryMeta::get_entry_meta_by_field($entry_id, $single_value);
+                                        if (!empty($real_value)) {
+                                            error_log("[FSS] Field #{$key} ({$field->name}): Array item {$single_value} was field ID, resolved to: " . print_r($real_value, true));
+                                            $resolved_values[] = is_array($real_value) ? implode(', ', $real_value) : $real_value;
+                                            $resolved = true;
+                                        }
+                                    }
+                                }
+
+                                // Si aucune résolution, garder la valeur originale
+                                if (!$resolved) {
+                                    $resolved_values[] = $single_value;
+                                }
+                            } else {
+                                // Pas numérique ou champ numérique, garder tel quel
+                                $resolved_values[] = $single_value;
+                            }
+                        }
+                        $value = implode(', ', $resolved_values);
+                    }
+
                     $message .= (isset($field->name) ? $field->name : "Field #$key") . ": " . $value . "\n";
                 }
             }
